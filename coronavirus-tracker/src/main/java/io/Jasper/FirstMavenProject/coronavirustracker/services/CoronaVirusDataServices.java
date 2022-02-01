@@ -1,4 +1,4 @@
-package io.Jasper.FirstMavenProject.coronavirustracker;
+package io.Jasper.FirstMavenProject.coronavirustracker.services;
 
 import io.Jasper.FirstMavenProject.coronavirustracker.models.LocationStats;
 import org.apache.commons.csv.CSVFormat;
@@ -34,7 +34,11 @@ import java.util.List;
 public class CoronaVirusDataServices {
 
     private static String VIRUS_DATA_URL = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
-    private List<LocationStats>  allStatus = new ArrayList<>();
+    private List<LocationStats> allStatus = new ArrayList<>();
+
+    public List<LocationStats> getAllStatus() {
+        return allStatus;
+    }
 
     @PostConstruct
     @Scheduled(cron = "* * 1 * * *")
@@ -55,12 +59,16 @@ public class CoronaVirusDataServices {
             LocationStats locationStats = new LocationStats();
             locationStats.setState(record.get("Province/State"));
             locationStats.setCountry(record.get("Country/Region"));
-            locationStats.setLatestTotalCases(Integer.parseInt(record.get(record.size() - 1)));
+
+            int latestCases = Integer.parseInt(record.get(record.size() - 1));
+            int prevDayCases = Integer.parseInt(record.get(record.size() - 2));
+
+            locationStats.setLatestTotalCases(latestCases);
+            locationStats.setDiffFromPrevDay(latestCases - prevDayCases);
             System.out.println(locationStats);
             newStatus.add(locationStats);
         }
 
-        this.allStatus = newStatus;.
-        
+        this.allStatus = newStatus;
     }
 }
